@@ -17,9 +17,6 @@ func NewMongoLog(log string) *MongoLog {
 // Get returns a JSON string of a tag
 func (ml *MongoLog) Get(key string) string {
 	str := ml.log
-	if strings.HasSuffix(key, ":") == false {
-		key += ":"
-	}
 	i := strings.Index(str, key)
 	if i < 0 {
 		return ""
