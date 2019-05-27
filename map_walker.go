@@ -36,7 +36,9 @@ func (walker *MapWalker) Walk(docMap map[string]interface{}) map[string]interfac
 				panic(v)
 			}
 		default:
-			docMap[k] = walker.cb(v)
+			if walker.cb != nil {
+				docMap[k] = walker.cb(v)
+			}
 		}
 	}
 	return docMap
