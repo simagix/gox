@@ -59,7 +59,9 @@ func CountLines(reader *bufio.Reader) (int, error) {
 func OutputGzipped(b []byte, filename string) error {
 	var zbuf bytes.Buffer
 	gz := gzip.NewWriter(&zbuf)
-	gz.Write(b)
-	gz.Close() // close this before flushing the bytes to the buffer.
+	if _, err := gz.Write(b); err != nil {
+		return err
+	}
+	gz.Close() // flushing the bytes to the buffer.
 	return ioutil.WriteFile(filename, zbuf.Bytes(), 0644)
 }

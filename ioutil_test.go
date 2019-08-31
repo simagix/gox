@@ -5,6 +5,7 @@ package gox
 import (
 	"bufio"
 	"compress/gzip"
+	"io/ioutil"
 	"os"
 	"testing"
 )
@@ -55,5 +56,38 @@ func TestCountLines(t *testing.T) {
 
 	if count != total {
 		t.Fatal(count)
+	}
+}
+
+func TestOutputGzipped(t *testing.T) {
+	var err error
+	var b []byte
+	var fz *gzip.Reader
+	var file *os.File
+	filename := "/tmp/filename.gz"
+	str := "This is a test line"
+	if err = OutputGzipped([]byte(str), filename); err != nil {
+		t.Fatal(err)
+	}
+	if file, err = os.Open(filename); err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	if fz, err = gzip.NewReader(file); err != nil {
+		t.Fatal(err)
+	}
+	defer fz.Close()
+
+	if b, err = ioutil.ReadAll(fz); err != nil {
+		t.Fatal(err)
+	}
+
+	if string(b) != str {
+		t.Fatal(err)
+	}
+
+	if err = os.Remove(filename); err != nil {
+		t.Fatal(err)
 	}
 }
