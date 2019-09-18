@@ -76,16 +76,5 @@ func ReadAll(file *os.File) ([]byte, error) {
 		return b, err
 	}
 
-	if b, err = reader.Peek(2); err != nil {
-		return b, err
-	}
-
-	if b[0] == 31 && b[1] == 139 { // gzipped
-		var gz *gzip.Reader
-		if gz, err = gzip.NewReader(file); err != nil {
-			return b, err
-		}
-		return ioutil.ReadAll(gz)
-	}
 	return ioutil.ReadAll(reader)
 }
