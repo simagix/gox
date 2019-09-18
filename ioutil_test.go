@@ -91,3 +91,22 @@ func TestOutputGzipped(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestReadAll(t *testing.T) {
+	var file *os.File
+	var zfile *os.File
+	filename := "/tmp/count.file"
+	zfilename := "/tmp/count.file.gz"
+	str := "keyhole"
+	ioutil.WriteFile(filename, []byte(str), 0644)
+	OutputGzipped([]byte(str), zfilename)
+	file, _ = os.Open(filename)
+	zfile, _ = os.Open(zfilename)
+
+	b, _ := ReadAll(file)
+	bz, _ := ReadAll(zfile)
+
+	if string(b) != string(bz) {
+		t.Fatal("ReadAll failed")
+	}
+}

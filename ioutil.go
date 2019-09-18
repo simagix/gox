@@ -65,3 +65,27 @@ func OutputGzipped(b []byte, filename string) error {
 	gz.Close() // flushing the bytes to the buffer.
 	return ioutil.WriteFile(filename, zbuf.Bytes(), 0644)
 }
+
+// ReadAll reads from a file and return bytes
+func ReadAll(file *os.File) ([]byte, error) {
+	var err error
+	var b []byte
+	var reader *bufio.Reader
+
+	if reader, err = NewReader(file); err != nil {
+		return b, err
+	}
+
+	if b, err = reader.Peek(2); err != nil {
+		return b, err
+	}
+
+	if b[0] == 31 && b[1] == 139 { // gzipped
+		var gz *gzip.Reader
+		if gz, err = gzip.NewReader(file); err != nil {
+			return b, err
+		}
+		return ioutil.ReadAll(gz)
+	}
+	return ioutil.ReadAll(reader)
+}
