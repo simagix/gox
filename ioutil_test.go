@@ -10,6 +10,28 @@ import (
 	"testing"
 )
 
+func TestNewFileReader(t *testing.T) {
+	var err error
+	var file *os.File
+	filename := "/tmp/count.file"
+	if file, err = os.Create(filename); err != nil {
+		t.Fatal(err)
+	}
+	writer := gzip.NewWriter(file)
+	str := "keyhole"
+	b := []byte(str)
+	writer.Write(b)
+	writer.Flush()
+	file.Close()
+
+	reader, _ := NewFileReader(filename)
+	buf, _, _ := reader.ReadLine()
+
+	if str != string(buf) {
+		t.Fatal(string(buf))
+	}
+}
+
 func TestNewReader(t *testing.T) {
 	var err error
 	var file *os.File

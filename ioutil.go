@@ -11,6 +11,15 @@ import (
 	"os"
 )
 
+// NewFileReader returns a reader from either a gzip or plain file
+func NewFileReader(filename string) (*bufio.Reader, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	return NewReader(file)
+}
+
 // NewReader returns a reader from either a gzip or plain file
 func NewReader(file *os.File) (*bufio.Reader, error) {
 	var buf []byte
