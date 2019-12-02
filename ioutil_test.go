@@ -87,7 +87,10 @@ func TestOutputGzipped(t *testing.T) {
 	var fz *gzip.Reader
 	var file *os.File
 	filename := "/tmp/filename.gz"
-	str := "This is a test line"
+	str := "This is a test line! "
+	for len(str) < (10 * 1024 * 1024) {
+		str += str
+	}
 	if err = OutputGzipped([]byte(str), filename); err != nil {
 		t.Fatal(err)
 	}
