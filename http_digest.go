@@ -3,6 +3,7 @@
 package gox
 
 import (
+	"bytes"
 	"crypto/md5"
 	"crypto/rand"
 	"encoding/hex"
@@ -13,12 +14,12 @@ import (
 )
 
 // HTTPDigest --digest
-func HTTPDigest(method string, uri string, username string, password string, headers map[string]string) (*http.Response, error) {
+func HTTPDigest(method string, uri string, username string, password string, headers map[string]string, body ...[]byte) (*http.Response, error) {
 	var err error
 	var req *http.Request
 	var resp *http.Response
 
-	req, err = http.NewRequest("GET", uri, nil)
+	req, err = http.NewRequest(method, uri, nil)
 	if err != nil {
 		return resp, err
 	}
@@ -58,7 +59,12 @@ func HTTPDigest(method string, uri string, username string, password string, hea
 	response := hash(fmt.Sprintf("%s:%s:%v:%s:%s:%s", ha1, digest["nonce"], nonceCount, cnonce, digest["qop"], ha2))
 	authorization := fmt.Sprintf(`Digest username="%s", realm="%s", nonce="%s", uri="%s", cnonce="%s", nc="%v", qop="%s", response="%s"`,
 		digest["username"], digest["realm"], digest["nonce"], digest["uri"], cnonce, nonceCount, digest["qop"], response)
+
+	if len(body) > 0 {
+		req, _ = http.NewRequest(method, uri, bytes.NewBuffer(body[0]))
+	}
 	req.Header.Set("Authorization", authorization)
+	req.Header.Set("Content-Type", "application/json")
 	return http.DefaultClient.Do(req)
 }
 
