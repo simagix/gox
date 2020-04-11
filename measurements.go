@@ -44,3 +44,19 @@ func GetDurationFromSeconds(seconds float64) string {
 	}
 	return timestr
 }
+
+// MilliToTimeString converts milliseconds to time string, e.g. 1.5m
+func MilliToTimeString(milli float64) string {
+	avgstr := fmt.Sprintf("%6.0f", milli)
+	if milli >= 3600000 {
+		milli /= 3600000
+		avgstr = fmt.Sprintf("%4.1fh", milli)
+	} else if milli >= 60000 {
+		milli /= 60000
+		avgstr = fmt.Sprintf("%3.1fm", milli)
+	} else if milli >= 1000 {
+		milli /= 1000
+		avgstr = fmt.Sprintf("%3.1fs", milli)
+	}
+	return avgstr
+}
