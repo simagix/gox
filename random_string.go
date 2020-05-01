@@ -25,6 +25,6 @@ func GetRandomHexString(n int) string {
 
 // GetRandomUUIDString returns a random UUID string
 func GetRandomUUIDString() string {
-	return fmt.Sprintf("%s-%s-%s-%s-%s", GetRandomHexString(8), GetRandomHexString(4), GetRandomHexString(4),
+	return fmt.Sprintf(`UUID("%s-%s-%s-%s-%s")`, GetRandomHexString(8), GetRandomHexString(4), GetRandomHexString(4),
 		GetRandomHexString(4), GetRandomHexString(12))
 }

@@ -17,7 +17,7 @@ func TestGetRandomHexString(t *testing.T) {
 }
 
 func TestGetRandomUUIDString(t *testing.T) {
-	if n := len(GetRandomUUIDString()); n != 36 {
+	if n := len(GetRandomUUIDString()); n != 44 {
 		t.Fatal(n)
 	}
 }
