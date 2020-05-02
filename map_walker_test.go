@@ -11,8 +11,27 @@ func TestWalk(t *testing.T) {
 	docMap["color"] = "Red"
 	walker := NewMapWalker(cb)
 	doc := walker.Walk(docMap)
-	if doc["color"] != "Green" {
-		t.Fatal("Expected", "Green", "but got", doc["color"])
+	if doc.(map[string]interface{})["color"] != "Green" {
+		t.Fatal("Expected", "Green", "but got", doc.(map[string]interface{})["color"])
+	}
+
+	walker = NewMapWalker(nil)
+	map2 := map[string]interface{}{}
+	map2["doc"] = doc
+	doc = walker.Walk(map2)
+	t.Log(doc)
+	if walker.GetNestedLevel() != 2 {
+		t.Fatal(walker.GetNestedLevel())
+	}
+
+	walker = NewMapWalker(nil)
+	map3 := map[string]interface{}{}
+	map3["three"] = map2
+	map3["four"] = map2
+	doc = walker.Walk(map3)
+	t.Log(doc)
+	if walker.GetNestedLevel() != 3 {
+		t.Fatal(walker.GetNestedLevel())
 	}
 }
 

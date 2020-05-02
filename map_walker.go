@@ -1,4 +1,4 @@
-// Copyright 2019 Kuei-chun Chen. All rights reserved.
+// Copyright 2020 Kuei-chun Chen. All rights reserved.
 
 package gox
 
@@ -10,61 +10,47 @@ type callback func(interface{}) interface{}
 
 // MapWalker is an empty JSON document
 type MapWalker struct {
-	cb callback
+	level       int
+	nestedLevel int
+	cb          callback
 }
 
 // NewMapWalker returns a MapWalker
 func NewMapWalker(cb callback) *MapWalker {
-	return &MapWalker{cb: cb}
+	return &MapWalker{cb: cb, nestedLevel: 1}
 }
+
+// GetNestedLevel return the level of nested document
+func (walker *MapWalker) GetNestedLevel() int { return walker.nestedLevel }
 
 // Walk walks a map
-func (walker *MapWalker) Walk(docMap map[string]interface{}) map[string]interface{} {
-	for k, v := range docMap {
-		vt := reflect.TypeOf(v)
-		switch vt.Kind() {
-		case reflect.Map:
-			if mv, ok := v.(map[string]interface{}); ok {
-				docMap[k] = walker.Walk(mv)
-			} else {
-				panic(v)
+func (walker *MapWalker) Walk(v interface{}) interface{} {
+	vt := reflect.TypeOf(v)
+	switch vt.Kind() {
+	case reflect.Map:
+		if vmap, ok := v.(map[string]interface{}); ok {
+			walker.level++
+			if walker.level > walker.nestedLevel {
+				walker.nestedLevel = walker.level
 			}
-		case reflect.Array, reflect.Slice:
-			if mv, ok := v.([]interface{}); ok {
-				docMap[k] = walker.iterate(mv)
-			} else {
-				panic(v)
+			for k, val := range vmap {
+				vmap[k] = walker.Walk(val)
 			}
-		default:
-			if walker.cb != nil {
-				docMap[k] = walker.cb(v)
+			walker.level--
+			return vmap
+		}
+		return v
+	case reflect.Array, reflect.Slice:
+		if arr, ok := v.([]interface{}); ok {
+			for i, val := range arr {
+				arr[i] = walker.Walk(val)
 			}
+			return arr
+		}
+	default:
+		if walker.cb != nil {
+			return walker.cb(v)
 		}
 	}
-	return docMap
-}
-
-// iterate iterates thru an array
-func (walker *MapWalker) iterate(arrayType []interface{}) []interface{} {
-	for k, v := range arrayType {
-		vt := reflect.TypeOf(v)
-		switch vt.Kind() {
-		case reflect.Map:
-			if mv, ok := v.(map[string]interface{}); ok {
-				arrayType[k] = walker.Walk(mv)
-			} else {
-				panic(v)
-			}
-		case reflect.Array, reflect.Slice:
-			if mv, ok := v.([]interface{}); ok {
-				arrayType[k] = walker.iterate(mv)
-			} else {
-				panic(v)
-			}
-		default:
-			arrayType[k] = walker.cb(v)
-		}
-
-	}
-	return arrayType
+	return v
 }
