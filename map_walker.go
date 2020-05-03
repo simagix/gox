@@ -3,6 +3,7 @@
 package gox
 
 import (
+	"encoding/json"
 	"reflect"
 )
 
@@ -10,9 +11,9 @@ type callback func(interface{}) interface{}
 
 // MapWalker is an empty JSON document
 type MapWalker struct {
+	cb          callback
 	level       int
 	nestedLevel int
-	cb          callback
 }
 
 // NewMapWalker returns a MapWalker
@@ -20,30 +21,45 @@ func NewMapWalker(cb callback) *MapWalker {
 	return &MapWalker{cb: cb, nestedLevel: 1}
 }
 
+// SetCallBack defines callback function
+func (walker *MapWalker) SetCallBack(cb callback) { walker.cb = cb }
+
 // GetNestedLevel return the level of nested document
 func (walker *MapWalker) GetNestedLevel() int { return walker.nestedLevel }
 
 // Walk walks a map
 func (walker *MapWalker) Walk(v interface{}) interface{} {
+	walker.level = 0
+	walker.nestedLevel = 0
+	return walker.traverse(v)
+}
+
+// traverse walks a map
+func (walker *MapWalker) traverse(v interface{}) interface{} {
 	vt := reflect.TypeOf(v)
 	switch vt.Kind() {
 	case reflect.Map:
-		if vmap, ok := v.(map[string]interface{}); ok {
-			walker.level++
-			if walker.level > walker.nestedLevel {
-				walker.nestedLevel = walker.level
+		vmap, ok := v.(map[string]interface{})
+		if !ok {
+			buf, err := json.Marshal(v)
+			if err != nil {
+				return v
 			}
-			for k, val := range vmap {
-				vmap[k] = walker.Walk(val)
-			}
-			walker.level--
-			return vmap
+			json.Unmarshal(buf, &vmap)
 		}
-		return v
+		walker.level++
+		if walker.level > walker.nestedLevel {
+			walker.nestedLevel = walker.level
+		}
+		for k, val := range vmap {
+			vmap[k] = walker.traverse(val)
+		}
+		walker.level--
+		return vmap
 	case reflect.Array, reflect.Slice:
 		if arr, ok := v.([]interface{}); ok {
 			for i, val := range arr {
-				arr[i] = walker.Walk(val)
+				arr[i] = walker.traverse(val)
 			}
 			return arr
 		}
