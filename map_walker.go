@@ -36,7 +36,13 @@ func (walker *MapWalker) Walk(v interface{}) interface{} {
 
 // traverse walks a map
 func (walker *MapWalker) traverse(v interface{}) interface{} {
+	if v == nil {
+		return v
+	}
 	vt := reflect.TypeOf(v)
+	if vt == nil {
+		return v
+	}
 	switch vt.Kind() {
 	case reflect.Map:
 		vmap, ok := v.(map[string]interface{})
