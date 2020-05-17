@@ -61,18 +61,23 @@ func (walker *MapWalker) traverse(v interface{}) interface{} {
 			vmap[k] = walker.traverse(val)
 		}
 		walker.level--
-		return vmap
+		v = vmap
 	case reflect.Array, reflect.Slice:
-		if arr, ok := v.([]interface{}); ok {
-			for i, val := range arr {
-				arr[i] = walker.traverse(val)
+		arr, ok := v.([]interface{})
+		if !ok {
+			buf, err := json.Marshal(v)
+			if err != nil {
+				return v
 			}
-			return arr
+			json.Unmarshal(buf, &arr)
 		}
-	default:
-		if walker.cb != nil {
-			return walker.cb(v)
+		for i, val := range arr {
+			arr[i] = walker.traverse(val)
 		}
+		v = arr
+	}
+	if walker.cb != nil {
+		v = walker.cb(v)
 	}
 	return v
 }

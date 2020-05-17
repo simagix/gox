@@ -3,16 +3,23 @@
 package gox
 
 import (
+	"reflect"
 	"testing"
 )
 
 func TestWalk(t *testing.T) {
 	docMap := make(map[string]interface{})
 	docMap["color"] = "Red"
+	docMap["array"] = []string{"hello", "world"}
+	docMap["colors"] = []string{"Red", "Yellow", "Brown", "Black", "White"}
+	length := len(docMap["colors"].([]string))
 	walker := NewMapWalker(cb)
 	doc := walker.Walk(docMap)
 	if doc.(map[string]interface{})["color"] != "Green" {
 		t.Fatal("Expected", "Green", "but got", doc.(map[string]interface{})["color"])
+	}
+	if maxArrayLength != length {
+		t.Fatal("Expected", length, "but got", maxArrayLength)
 	}
 	t.Log(Stringify(doc, "", "  "))
 
@@ -34,14 +41,18 @@ func TestWalk(t *testing.T) {
 	}
 }
 
+var maxArrayLength = 0
+
 func cb(value interface{}) interface{} {
 	if v, ok := value.(string); ok {
 		if v == "Red" {
 			return "Green"
-		} else if v == "Green" {
-			return "Yellow"
-		} else if v == "Yellow" {
-			return "Red"
+		}
+	} else if reflect.TypeOf(value).Kind() == reflect.Array ||
+		reflect.TypeOf(value).Kind() == reflect.Slice {
+		length := len(value.([]interface{}))
+		if length > maxArrayLength {
+			maxArrayLength = length
 		}
 	}
 	return value
