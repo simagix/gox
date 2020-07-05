@@ -24,7 +24,7 @@ func GetStorageSize(num interface{}) string {
 	} else if x >= 1024 {
 		return fmt.Sprintf("%.1fKB", x/1024)
 	}
-	return fmt.Sprintf("%v", x)
+	return fmt.Sprintf("%v", int64(x))
 }
 
 // GetDurationFromSeconds converts seconds to time string, e.g. 1.5m

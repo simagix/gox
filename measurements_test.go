@@ -7,8 +7,13 @@ import (
 )
 
 func TestGetStorageSize(t *testing.T) {
-	size := 123456789
+	size := float64(123456789)
 	if s := GetStorageSize(size); s != "117.7MB" {
+		t.Fatal(s)
+	}
+
+	size = 3.14159262
+	if s := GetStorageSize(size); s != "3" {
 		t.Fatal(s)
 	}
 }
