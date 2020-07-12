@@ -61,7 +61,7 @@ func (walker *MapWalker) traverse(v interface{}) interface{} {
 			vmap[k] = walker.traverse(val)
 		}
 		walker.level--
-		v = vmap
+		return vmap
 	case reflect.Array, reflect.Slice:
 		arr, ok := v.([]interface{})
 		if !ok {
@@ -74,10 +74,10 @@ func (walker *MapWalker) traverse(v interface{}) interface{} {
 		for i, val := range arr {
 			arr[i] = walker.traverse(val)
 		}
-		v = arr
+		return arr
 	}
 	if walker.cb != nil {
-		v = walker.cb(v)
+		return walker.cb(v)
 	}
 	return v
 }
