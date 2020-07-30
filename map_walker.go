@@ -11,6 +11,7 @@ type callback func(interface{}) interface{}
 
 // MapWalker is an empty JSON document
 type MapWalker struct {
+	arrayLength int
 	cb          callback
 	level       int
 	nestedLevel int
@@ -29,6 +30,7 @@ func (walker *MapWalker) GetNestedLevel() int { return walker.nestedLevel }
 
 // Walk walks a map
 func (walker *MapWalker) Walk(v interface{}) interface{} {
+	walker.arrayLength = 0
 	walker.level = 0
 	walker.nestedLevel = 0
 	return walker.traverse(v)
@@ -70,6 +72,9 @@ func (walker *MapWalker) traverse(v interface{}) interface{} {
 				return v
 			}
 			json.Unmarshal(buf, &arr)
+		}
+		if len(arr) > walker.arrayLength {
+			walker.arrayLength = len(arr)
 		}
 		for i, val := range arr {
 			arr[i] = walker.traverse(val)
