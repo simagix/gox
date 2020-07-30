@@ -28,6 +28,9 @@ func (walker *MapWalker) SetCallBack(cb callback) { walker.cb = cb }
 // GetNestedLevel return the level of nested document
 func (walker *MapWalker) GetNestedLevel() int { return walker.nestedLevel }
 
+// GetMaxArrayLength return the max array length
+func (walker *MapWalker) GetMaxArrayLength() int { return walker.arrayLength }
+
 // Walk walks a map
 func (walker *MapWalker) Walk(v interface{}) interface{} {
 	walker.arrayLength = 0
