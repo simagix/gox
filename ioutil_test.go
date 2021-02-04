@@ -135,3 +135,14 @@ func TestReadAll(t *testing.T) {
 		t.Fatal("ReadAll failed")
 	}
 }
+
+func TestZipFiles(t *testing.T) {
+	zipInto := "ioutil.zip"
+	toBeZipped := []string{"ioutil.go", "ioutil_test.go"}
+	if err := ZipFiles(zipInto, toBeZipped); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(zipInto); err != nil {
+		t.Fatal(err)
+	}
+}

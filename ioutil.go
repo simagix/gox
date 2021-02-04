@@ -3,6 +3,7 @@
 package gox
 
 import (
+	"archive/zip"
 	"bufio"
 	"bytes"
 	"compress/gzip"
@@ -92,4 +93,44 @@ func ReadAll(file *os.File) ([]byte, error) {
 	}
 
 	return ioutil.ReadAll(reader)
+}
+
+// ZipFiles zips files into a zip archive
+func ZipFiles(zipFilename string, filenames []string) error {
+	var err error
+	var zipFile *os.File
+	var file *os.File
+	var info os.FileInfo
+	var header *zip.FileHeader
+
+	if zipFile, err = os.Create(zipFilename); err != nil {
+		return err
+	}
+	defer zipFile.Close()
+
+	writer := zip.NewWriter(zipFile)
+	defer writer.Close()
+
+	for _, filename := range filenames {
+		if file, err = os.Open(filename); err != nil {
+			return err
+		}
+		defer file.Close()
+		if info, err = file.Stat(); err != nil {
+			return err
+		}
+		if header, err = zip.FileInfoHeader(info); err != nil {
+			return err
+		}
+		header.Name = filename
+		header.Method = zip.Deflate
+		var w io.Writer
+		if w, err = writer.CreateHeader(header); err != nil {
+			return err
+		}
+		if _, err = io.Copy(w, file); err != nil {
+			return err
+		}
+	}
+	return nil
 }
