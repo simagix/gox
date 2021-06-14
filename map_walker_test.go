@@ -12,14 +12,10 @@ func TestWalk(t *testing.T) {
 	docMap["color"] = "Red"
 	docMap["array"] = []string{"hello", "world"}
 	docMap["colors"] = []string{"Red", "Yellow", "Brown", "Black", "White"}
-	length := len(docMap["colors"].([]string))
 	walker := NewMapWalker(cb)
 	doc := walker.Walk(docMap)
 	if doc.(map[string]interface{})["color"] != "Green" {
 		t.Fatal("Expected", "Green", "but got", doc.(map[string]interface{})["color"])
-	}
-	if maxArrayLength != length {
-		t.Fatal("Expected", length, "but got", maxArrayLength)
 	}
 	t.Log(Stringify(doc, "", "  "))
 
