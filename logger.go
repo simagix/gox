@@ -14,14 +14,15 @@ const (
 	Trace int = iota
 	Debug
 	Info
+	Remark
 	Warn
 	Error
 )
 
 // Logger stores logger info
 type Logger struct {
-	AppName string
-	Logs    []string
+	AppName string   `json:"version" bson:"version"`
+	Logs    []string `json:"logs" bson:"logs"`
 	level   int
 }
 
@@ -32,7 +33,7 @@ var once sync.Once
 func GetLogger(appName string) *Logger {
 	once.Do(func() {
 		instance = &Logger{AppName: appName, level: Info}
-		instance.Infof(`%v begins at %v`, appName, time.Now().Format(time.RFC3339))
+		instance.Remarkf(`%v begins at %v`, appName, time.Now().Format(time.RFC3339))
 	})
 	return instance
 }
@@ -60,6 +61,16 @@ func (p *Logger) Warn(v ...interface{}) {
 // Warnf adds and prints a message
 func (p *Logger) Warnf(format string, v ...interface{}) {
 	p.print("W", fmt.Sprintf(format, v...), Warn)
+}
+
+// Remark adds and prints a message
+func (p *Logger) Remark(v ...interface{}) {
+	p.print("R", fmt.Sprint(v...), Remark)
+}
+
+// Remarkf adds and prints a message
+func (p *Logger) Remarkf(format string, v ...interface{}) {
+	p.print("R", fmt.Sprintf(format, v...), Remark)
 }
 
 // Info adds and prints a message
