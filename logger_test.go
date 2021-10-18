@@ -28,11 +28,30 @@ func TestWarnf(t *testing.T) {
 
 func TestDebug(t *testing.T) {
 	logger := GetLogger("TestDebug")
+	num := len(logger.Logs)
+
 	logger.Debug(`no message`)
+	t.Log(num, len(logger.Logs))
+	assertEqual(t, num, len(logger.Logs))
+
 	logger.SetLoggerLevel(Debug)
 	logger.Debug(`debug message`)
+	t.Log(num, len(logger.Logs))
+	assertEqual(t, num, len(logger.Logs))
+
 	logger.SetLoggerLevel(Info)
 	logger.Debug(`no message`)
+	t.Log(num, len(logger.Logs))
+	assertEqual(t, num, len(logger.Logs))
+
 	logger.SetLoggerLevel(Trace)
 	logger.Debug(`trace message`)
+	t.Log(num, len(logger.Logs))
+	assertEqual(t, num, len(logger.Logs))
+}
+
+func assertEqual(t *testing.T, a interface{}, b interface{}) {
+	if a != b {
+		t.Fatalf("%s != %s", a, b)
+	}
 }

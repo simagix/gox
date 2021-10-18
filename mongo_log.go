@@ -27,10 +27,10 @@ func (ml *MongoLog) Get(key string) string {
 	epos := 0 // end position
 	for _, r := range str {
 		epos++
-		if isFound == false && r == '{' {
+		if !isFound && r == '{' {
 			isFound = true
 			bpos++
-		} else if isFound == true {
+		} else if isFound {
 			if r == '{' {
 				bpos++
 			} else if r == '}' {
@@ -38,7 +38,7 @@ func (ml *MongoLog) Get(key string) string {
 			}
 		}
 
-		if isFound == true && bpos == 0 {
+		if isFound && bpos == 0 {
 			break
 		}
 	}

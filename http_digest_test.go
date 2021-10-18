@@ -17,6 +17,9 @@ func TestHTTPDigest(t *testing.T) {
 	headers["Content-Type"] = "application/json"
 	headers["Accept"] = "application/json"
 	resp, err := HTTPDigest("GET", BaseURL, login[:idx], login[idx+1:], headers)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 401 {
 		t.Fatal(resp.StatusCode)
