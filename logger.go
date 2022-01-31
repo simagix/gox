@@ -109,8 +109,11 @@ func (p *Logger) print(indicator string, message string, level int) {
 		return
 	}
 	str := fmt.Sprintf(`%v %v %v`, time.Now().Format(time.RFC3339), indicator, message)
-	p.Logs = append(p.Logs, str)
 	fmt.Println(str)
+	if level < Info {
+		return
+	}
+	p.Logs = append(p.Logs, str)
 }
 
 // Print prints all Logs

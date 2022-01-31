@@ -40,7 +40,7 @@ func GetDurationFromSeconds(seconds float64) string {
 		seconds /= 60
 		timestr = fmt.Sprintf("%3.1f minutes", seconds)
 	} else if seconds >= 1 {
-		timestr = fmt.Sprintf("%3.0f secnods", seconds)
+		timestr = fmt.Sprintf("%3.0f seconds", seconds)
 	}
 	return timestr
 }
