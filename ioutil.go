@@ -7,9 +7,12 @@ import (
 	"bufio"
 	"bytes"
 	"compress/gzip"
+	"encoding/hex"
 	"io"
 	"io/ioutil"
 	"os"
+
+	"github.com/golang/snappy"
 )
 
 // NewFileReader returns a reader from either a gzip or plain file
@@ -28,12 +31,14 @@ func NewReader(file *os.File) (*bufio.Reader, error) {
 	var reader *bufio.Reader
 
 	reader = bufio.NewReader(file)
-	if buf, err = reader.Peek(2); err != nil {
+	if buf, err = reader.Peek(10); err != nil {
 		return reader, err
 	}
 	file.Seek(0, 0)
-
-	if buf[0] == 31 && buf[1] == 139 {
+	bs, err := hex.DecodeString("ff060000734e61507059")
+	if string(bs) == string(buf) {
+		reader = bufio.NewReader(snappy.NewReader(file))
+	} else if buf[0] == 31 && buf[1] == 139 {
 		var zreader *gzip.Reader
 		if zreader, err = gzip.NewReader(file); err != nil {
 			return reader, err
@@ -73,12 +78,29 @@ func OutputGzipped(b []byte, filename string) error {
 	gz := gzip.NewWriter(&zbuf)
 	nw := 0
 	for nw < len(b) {
-		if n, err = gz.Write(b); err != nil {
+		if n, err = gz.Write(b[nw:]); err != nil {
 			return err
 		}
 		nw += n
 	}
 	gz.Close() // flushing the bytes to the buffer.
+	return ioutil.WriteFile(filename, zbuf.Bytes(), 0644)
+}
+
+// OutputSnappyZipped writes doc to a gzipped file
+func OutputSnappyZipped(b []byte, filename string) error {
+	var zbuf bytes.Buffer
+	var n int
+	var err error
+	snz := snappy.NewWriter(&zbuf)
+	nw := 0
+	for nw < len(b) {
+		if n, err = snz.Write(b[nw:]); err != nil {
+			return err
+		}
+		nw += n
+	}
+	snz.Close() // flushing the bytes to the buffer.
 	return ioutil.WriteFile(filename, zbuf.Bytes(), 0644)
 }
 

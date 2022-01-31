@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 	"testing"
+
+	"github.com/golang/snappy"
 )
 
 func TestNewFileReader(t *testing.T) {
@@ -34,26 +36,37 @@ func TestNewFileReader(t *testing.T) {
 
 func TestNewReader(t *testing.T) {
 	var err error
-	var file *os.File
-	filename := "/tmp/count.file"
-	if file, err = os.Create(filename); err != nil {
+	// var file *os.File
+	filename := "keyhole.gz"
+	str := "keyhole"
+	OutputGzipped([]byte(str), filename)
+	gzreader, err := NewFileReader(filename)
+	if err != nil {
 		t.Fatal(err)
 	}
-	writer := gzip.NewWriter(file)
-	str := "keyhole"
-	b := []byte(str)
-	writer.Write(b)
-	writer.Flush()
-	file.Close()
-
-	file, _ = os.Open(filename)
-	defer file.Close()
-	reader, _ := NewReader(file)
-	buf, _, _ := reader.ReadLine()
-
+	buf, _, err := gzreader.ReadLine()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if str != string(buf) {
 		t.Fatal(string(buf))
 	}
+	os.Remove(filename)
+
+	filename = "keyhole.sz"
+	OutputSnappyZipped([]byte(str), filename)
+	snzreader, err := NewFileReader(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	buf, _, err = snzreader.ReadLine()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if str != string(buf) {
+		t.Fatal(str, string(buf))
+	}
+	os.Remove(filename)
 }
 
 func TestCountLines(t *testing.T) {
@@ -103,6 +116,41 @@ func TestOutputGzipped(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer fz.Close()
+
+	if b, err = ioutil.ReadAll(fz); err != nil {
+		t.Fatal(err)
+	}
+
+	if string(b) != str {
+		t.Fatal(err)
+	}
+
+	if err = os.Remove(filename); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestOutputSnappyZipped(t *testing.T) {
+	var err error
+	var b []byte
+	var fz *snappy.Reader
+	var file *os.File
+	filename := "/tmp/filename.gz"
+	str := "This is a test line! "
+	for len(str) < (10 * 1024 * 1024) {
+		str += str
+	}
+	if err = OutputSnappyZipped([]byte(str), filename); err != nil {
+		t.Fatal(err)
+	}
+	if file, err = os.Open(filename); err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
+	if fz = snappy.NewReader(file); err != nil {
+		t.Fatal(err)
+	}
 
 	if b, err = ioutil.ReadAll(fz); err != nil {
 		t.Fatal(err)
