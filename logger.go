@@ -21,19 +21,30 @@ const (
 
 // Logger stores logger info
 type Logger struct {
-	AppName string   `json:"version" bson:"version"`
-	Logs    []string `json:"logs" bson:"logs"`
-	level   int
+	AppName string
+	Logs    []string
+
+	inMem bool
+	level int
 }
 
 var instance *Logger
 var once sync.Once
 
 // GetLogger returns Logger instance
-func GetLogger(appName string) *Logger {
+func GetLogger(params ...interface{}) *Logger {
 	once.Do(func() {
-		instance = &Logger{AppName: appName, level: Info}
-		instance.Remarkf(`%v begins at %v`, appName, time.Now().Format(time.RFC3339))
+		instance = &Logger{AppName: "gox", level: Info, inMem: true}
+		if len(params) > 0 {
+			instance.AppName = fmt.Sprintf("%v", params[0])
+			instance.Remarkf(`%v begins at %v`, instance.AppName, time.Now().Format(time.RFC3339))
+		}
+		if len(params) > 1 {
+			inMem, ok := params[1].(bool)
+			if ok {
+				instance.inMem = inMem
+			}
+		}
 	})
 	return instance
 }
@@ -113,7 +124,9 @@ func (p *Logger) print(indicator string, message string, level int) {
 	if level < Info {
 		return
 	}
-	p.Logs = append(p.Logs, str)
+	if p.inMem {
+		p.Logs = append(p.Logs, str)
+	}
 }
 
 // Print prints all Logs

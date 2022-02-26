@@ -50,6 +50,30 @@ func TestDebug(t *testing.T) {
 	assertEqual(t, num, len(logger.Logs))
 }
 
+func TestGetLogger(t *testing.T) {
+	logger := GetLogger()
+	assertEqual(t, "gox", logger.AppName)
+	assertEqual(t, true, logger.inMem)
+}
+
+func TestGetLoggerOneParam(t *testing.T) {
+	appName := "myapp"
+	logger := GetLogger(appName)
+	assertEqual(t, appName, logger.AppName)
+	assertEqual(t, true, logger.inMem)
+}
+
+func TestGetLoggerTwoParams(t *testing.T) {
+	appName := "myapp"
+	logger := GetLogger(appName, false)
+	assertEqual(t, appName, logger.AppName)
+	assertEqual(t, false, logger.inMem)
+
+	logger.Info(appName)
+	logger.Debug(appName)
+	assertEqual(t, 1, len(logger.Logs))
+}
+
 func assertEqual(t *testing.T, a interface{}, b interface{}) {
 	if a != b {
 		t.Fatalf("%s != %s", a, b)
