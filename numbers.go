@@ -7,6 +7,12 @@ import (
 	"strconv"
 )
 
+// ToInt converts any data type to int (ignores errors, returns 0 on failure)
+func ToInt(num interface{}) int {
+	x, _ := ToInt64(num)
+	return int(x)
+}
+
 // ToInt64 converts any data type to int64
 func ToInt64(num interface{}) (int64, error) {
 	var err error
